@@ -1,0 +1,3 @@
+interface:
+  display_name: "Binance Funding Monitor"
+  short_description: "Monitor Binance USDT-M perpetual funding rates with sorting, arrows, countdowns, and highlight rules."
