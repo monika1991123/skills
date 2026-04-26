@@ -1,0 +1,15 @@
+{
+  "version": 3,
+  "skills": {
+    "surf": {
+      "source": "asksurf-ai/surf-skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/asksurf-ai/surf-skills.git",
+      "skillPath": "skills/surf/SKILL.md",
+      "skillFolderHash": "0ddde64bef7f854fbff3a9b99070559210a6177a",
+      "installedAt": "2026-04-26T08:28:34.742Z",
+      "updatedAt": "2026-04-26T08:28:34.742Z"
+    }
+  },
+  "dismissed": {}
+}
