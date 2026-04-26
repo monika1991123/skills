@@ -1,6 +1,6 @@
-# Kiro Skills 功能说明文档
+#  Skills 功能说明文档
 
-本文档介绍了所有已安装的 Kiro Skills 及其功能。Skills 是 AI 助手的能力扩展，帮助 AI 更好地完成特定任务。
+本文档介绍了所有已安装的  Skills 及其功能。Skills 是 AI 助手的能力扩展，帮助 AI 更好地完成特定任务。
 
 ---
 
