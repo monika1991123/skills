@@ -1,6 +1,6 @@
-#  Skills 功能说明文档
+# Kiro Skills 功能说明文档
 
-本文档介绍了所有已安装的  Skills 及其功能。Skills 是 AI 助手的能力扩展，帮助 AI 更好地完成特定任务。
+本文档介绍了所有已安装的 Kiro Skills 及其功能。Skills 是 AI 助手的能力扩展，帮助 AI 更好地完成特定任务。
 
 ---
 
@@ -10,7 +10,8 @@
 - [文档处理类](#文档处理类)
 - [设计与创意类](#设计与创意类)
 - [加密货币交易类](#加密货币交易类)
-- [OKX Web3类](#okx-web3类)
+- [OKX CEX 中心化交易类](#okx-cex-中心化交易类)
+- [OKX Web3 链上交易类](#okx-web3-链上交易类)
 - [工具与实用类](#工具与实用类)
 - [代码质量类](#代码质量类)
 - [社交媒体类](#社交媒体类)
@@ -54,7 +55,7 @@
 ### 7. subagent-driven-development
 **功能**: 使用子代理执行独立任务  
 **使用场景**: 在当前会话中执行具有独立任务的实施计划  
-**优势**: 每个任务由专门的子代理处理，提高效率
+**优势**: 每个任务由专门的子代理处理，提高效率，包含两阶段审查（规格合规性 + 代码质量）
 
 ### 8. dispatching-parallel-agents
 **功能**: 并行调度多个独立任务  
@@ -201,14 +202,23 @@
 - "看负资金费排行"
 - "展示下一次资金费倒计时"
 
-### 25. binance-readonly
+### 25. binance-monitor-runtime
+**功能**: 币安 USDⓈ-M USDT 永续合约市场监控运行时  
+**使用场景**:
+- 自动扫描价格、资金费、成交量异常
+- 生成综合评分报告（动能、共振、成交量、大户、波动）
+- 异常检测和 Telegram 推送
+**监控币种**: PEIVERSE, EDGE, GUA, APR, TRIA, LAB, STABLE, MYX, SOON, TA  
+**特点**: 多币种并发监控、综合评分算法、定时报告 + 异常告警
+
+### 26. binance-readonly
 **功能**: 币安只读市场/账户研究工具  
 **使用场景**:
 - 查询币安价格、K线、订单簿
 - 查看余额、未结订单、账户检查
 **安全特性**: 只读模式，除非用户明确要求启用交易，否则不会下单/取消订单
 
-### 26. crypto-market
+### 27. crypto-market
 **功能**: 通用加密货币市场研究工具  
 **使用场景**:
 - 加密货币价格查询
@@ -217,11 +227,100 @@
 - 历史趋势分析
 **特点**: 不需要交易所账户访问的广泛市场研究
 
+### 28. crypto-trading-radar
+**功能**: Stone141319 风格的半自动加密交易框架  
+**使用场景**:
+- 5分钟市场扫描（OKX 现货异动检测）
+- 多源 Alpha 雷达（OKX + DexScreener + Surf Skills）
+- 智能风控（ATR 波动率、趋势过滤、动态止损）
+- OKX 模拟仓自动执行
+- Telegram 看板实时监控
+**特点**: 
+- 综合评分系统（异动 + 链上 + 情绪）
+- 完整风控体系（波动率过滤、仓位缩放、分批止盈）
+- 执行闭环（开仓 → 止盈/止损 → TG 通知）
+
 ---
 
-## OKX Web3类
+## OKX CEX 中心化交易类
 
-### 40. okx-agentic-wallet
+### 29. okx-cex-market
+**功能**: OKX 中心化交易所市场数据查询  
+**使用场景**:
+- 价格、订单簿、市场深度、K线、OHLCV
+- 资金费率、持仓量、持仓量历史
+- 市场筛选器（涨幅榜、高成交量、新上币）
+- 技术指标（RSI、MACD、EMA、布林带等 70+ 指标）
+- 非加密资产（贵金属、大宗商品、外汇、债券）
+**特点**: 只读命令，无需 API 凭证
+
+### 30. okx-cex-portfolio
+**功能**: OKX 账户余额、持仓和投资组合管理  
+**使用场景**:
+- 账户余额、资金账户查询
+- 持仓查询、未实现盈亏
+- 已平仓位、已实现盈亏
+- 账户账单、交易历史、手续费
+- 资金划转、切换持仓模式
+**特点**: 需要 API 凭证
+
+### 31. okx-cex-trade
+**功能**: OKX 现货、合约、期权、事件合约交易  
+**使用场景**:
+- 现货交易（买入/卖出、限价/市价单）
+- 永续合约、交割期货（做多/做空）
+- 期权交易（看涨/看跌期权、Greeks、隐含波动率）
+- 事件合约（二元结果预测市场）
+- 条件单（止盈/止损/追踪止损）
+- 杠杆设置、订单管理
+**特点**: 需要 API 凭证，支持模拟交易
+
+### 32. okx-cex-bot
+**功能**: OKX 网格机器人和 DCA 马丁机器人管理  
+**使用场景**:
+- 网格机器人（现货/合约/币本位）
+- DCA 马丁机器人（现货马丁/合约马丁）
+- 创建、停止、修改机器人
+- 监控盈亏、止盈止损
+- 保证金/投资调整、AI 推荐参数
+**特点**: 服务器端机器人，无需本地运行
+
+### 33. okx-cex-earn
+**功能**: OKX 理财产品管理  
+**使用场景**:
+- 活期理财（灵活存取）
+- 闪赚、定期理财
+- 链上赚币（质押/DeFi）
+- 双币赢（结构化产品）
+- 自动赚币（自动借出/质押）
+- USDG 赚币
+**特点**: 申购、赎回、收益查询
+
+### 34. okx-cex-skill-mp
+**功能**: OKX 技能市场  
+**使用场景**:
+- 搜索、浏览、安装交易技能
+- 技能更新检查
+- 卸载技能
+- 查看已安装技能
+**特点**: 第三方开发者技能，本地运行
+
+### 35. okx-sentiment-tracker
+**功能**: 加密货币新闻和情绪分析  
+**使用场景**:
+- 最新加密新闻、市场更新
+- 币种特定新闻
+- 关键词新闻搜索
+- 情绪过滤新闻
+- 币种情绪快照、情绪趋势
+- 情绪排名、社交热度
+**特点**: 只读，需要 API 凭证
+
+---
+
+## OKX Web3 链上交易类
+
+### 36. okx-agentic-wallet
 **功能**: OKX Agentic Wallet核心操作和Gas Station功能  
 **使用场景**:
 - 钱包登录、OTP验证、添加/切换/登出账户
@@ -237,7 +336,7 @@
 - Gas Station = OKX的稳定币Gas功能，非ERC-4337 Paymaster
 - 严格的安全规则和预飞行检查
 
-### 41. okx-audit-log
+### 37. okx-audit-log
 **功能**: OKX审计日志导出和查看  
 **使用场景**: 
 - 导出审计日志、查找日志位置
@@ -246,7 +345,7 @@
 **格式**: JSON Lines，每行一个JSON对象  
 **注意**: 不用于钱包余额、代币搜索、交换等链上操作
 
-### 42. okx-defi-invest
+### 38. okx-defi-invest
 **功能**: 多链DeFi产品发现和投资执行  
 **使用场景**:
 - 投资DeFi、赚取USDC收益、存入Aave
@@ -261,7 +360,7 @@
 - 代币价格/图表 → 使用okx-dex-market
 - DEX交换 → 使用okx-dex-swap
 
-### 43. okx-defi-portfolio
+### 39. okx-defi-portfolio
 **功能**: 查看DeFi持仓和投资组合  
 **使用场景**:
 - 查看DeFi持仓、显示DeFi投资组合
@@ -272,7 +371,7 @@
 - 钱包代币余额 → 使用okx-wallet-portfolio
 - DEX现货交换 → 使用okx-dex-swap
 
-### 44. okx-dex-market
+### 40. okx-dex-market
 **功能**: 链上市场数据（代币价格、K线、盈亏分析）  
 **使用场景**:
 - 代币价格、价格图表、K线/OHLC
@@ -282,7 +381,7 @@
 **命令**: 9个链上价格、蜡烛图、指数价格和钱包PnL分析命令  
 **注意**: 如需编写WebSocket脚本/机器人，使用okx-dex-ws
 
-### 45. okx-dex-signal
+### 41. okx-dex-signal
 **功能**: 聪明钱/巨鲸/KOL活动追踪和信号警报  
 **使用场景**:
 - 聪明钱、KOL、巨鲸活动追踪
@@ -292,7 +391,7 @@
 - 追踪大户在买什么、聪明钱最新交易、KOL交易动态
 **注意**: 如需编写WebSocket脚本/机器人，使用okx-dex-ws
 
-### 46. okx-dex-swap
+### 42. okx-dex-swap
 **功能**: 多链DEX代币交换和最优路由  
 **使用场景**:
 - 交换代币、交易OKB为USDC、买入/卖出代币
@@ -304,7 +403,7 @@
 - 聚合500+ DEX来源的最优路由和价格
 - 滑点控制、价格影响保护、跨DEX路由优化
 
-### 47. okx-dex-token
+### 43. okx-dex-token
 **功能**: 代币级别数据和研究  
 **使用场景**:
 - 搜索代币、热门/流行代币（代币榜单）
@@ -315,7 +414,7 @@
 - 持有者聚类分析（持仓集中度、新钱包持仓比例、跑路风险）
 **注意**: 如需编写WebSocket脚本/机器人，使用okx-dex-ws
 
-### 48. okx-dex-trenches
+### 44. okx-dex-trenches
 **功能**: Meme/Alpha代币研究（pump.fun等发射平台）  
 **使用场景**:
 - 扫描新代币发射、检查开发者声誉/历史
@@ -325,7 +424,7 @@
 - 扫链、新盘、开发者信息、捆绑情况、打狗、Alpha研究
 **注意**: 如需编写WebSocket脚本/机器人，使用okx-dex-ws
 
-### 49. okx-dex-ws
+### 45. okx-dex-ws
 **功能**: DEX WebSocket会话管理和实时数据  
 **使用场景**:
 - 管理WebSocket会话（start/poll/stop/list/channels/channel-info）
@@ -335,7 +434,7 @@
 **命令**: onchainos ws CLI命令和WebSocket频道管理  
 **适用**: 需要实时数据流的自动化脚本和机器人
 
-### 50. okx-onchain-gateway
+### 46. okx-onchain-gateway
 **功能**: 交易广播、Gas估算和交易状态查询  
 **使用场景**:
 - 广播交易、发送交易、估算Gas
@@ -349,7 +448,7 @@
 - 不用于一般编程问题 → 不适用此skill
 - 如果只说"gas"或"broadcast"等单字且无上下文 → 不适用此skill
 
-### 51. okx-security
+### 47. okx-security
 **功能**: 安全扫描和风险检测  
 **使用场景**:
 - 检查交易安全性、交易前安全检查、安全扫描
@@ -360,7 +459,7 @@
 **覆盖范围**: token-scan、dapp-scan、tx-scan（EVM+Solana交易前执行）、sig-scan（EIP-712/personal_sign）、授权管理（ERC-20/Permit2）  
 **区分**: 不用于钱包余额/发送/历史 → 使用okx-agentic-wallet
 
-### 52. okx-wallet-portfolio
+### 48. okx-wallet-portfolio
 **功能**: 指定钱包地址的余额、代币持仓和投资组合查询  
 **使用场景**:
 - 检查特定钱包地址的余额、代币持仓、组合价值、DeFi持仓
@@ -376,7 +475,7 @@
 - 关于余额API集成或编程问题 → 不适用此skill  
 **注意**: 需要提供具体钱包地址
 
-### 53. okx-x402-payment
+### 49. okx-x402-payment
 **功能**: HTTP 402 Payment Required支付网关处理  
 **使用场景**:
 - 遇到HTTP 402 Payment Required响应时支付费用
@@ -396,7 +495,7 @@
 
 ## 工具与实用类
 
-### 27. webapp-testing
+### 50. webapp-testing
 **功能**: 使用 Playwright 与本地 Web 应用交互和测试  
 **使用场景**:
 - 验证前端功能
@@ -404,7 +503,7 @@
 - 捕获浏览器截图
 - 查看浏览器日志
 
-### 28. notebooklm
+### 52. notebooklm
 **功能**: 直接从 Kiro 查询 Google NotebookLM 笔记本  
 **使用场景**: 需要基于文档的、有引用支持的答案  
 **特点**: 
@@ -413,14 +512,14 @@
 - 持久认证
 - 通过仅文档响应大幅减少幻觉
 
-### 29. mcp-builder
+### 53. mcp-builder
 **功能**: 创建高质量 MCP (Model Context Protocol) 服务器  
 **使用场景**: 构建 MCP 服务器以集成外部 API 或服务  
 **支持语言**: 
 - Python (FastMCP)
 - Node/TypeScript (MCP SDK)
 
-### 30. planning-with-files
+### 54. planning-with-files
 **功能**: 实现 Manus 风格的基于文件的规划  
 **使用场景**: 
 - 规划、分解或组织多步骤项目
@@ -429,11 +528,62 @@
 **创建文件**: task_plan.md、findings.md、progress.md  
 **特点**: 支持 /clear 后的自动会话恢复
 
+### 55. playwright-mcp
+**功能**: 浏览器自动化（Playwright MCP 服务器）  
+**使用场景**:
+- 网站导航、点击元素、填写表单
+- 数据提取、截图
+- 完整的浏览器自动化工作流
+**特点**: 支持 Chrome、Firefox、WebKit
+
+### 56. find-skills
+**功能**: 搜索和发现 OpenClaw 技能  
+**使用场景**:
+- 查找可用技能
+- 搜索特定功能
+- 发现新技能
+**来源**: ClawHub、OpenClaw Directory、LobeHub、GitHub
+
+### 57. github
+**功能**: 使用 gh CLI 与 GitHub 交互  
+**使用场景**:
+- 管理 Issues、Pull Requests
+- 查看 CI 运行状态
+- GitHub API 高级查询
+**特点**: 支持 JSON 输出和 jq 过滤
+
+### 58. openclaw-backup
+**功能**: OpenClaw 数据备份和恢复  
+**使用场景**:
+- 创建备份、设置自动备份计划
+- 从备份恢复
+- 管理备份轮换
+**备份内容**: 配置、凭证、工作区、代理配置
+
+### 59. summarize
+**功能**: 使用 summarize CLI 总结 URL 或文件  
+**使用场景**:
+- 总结网页、PDF、图片、音频
+- YouTube 视频总结
+**特点**: 支持多种 AI 模型（OpenAI、Anthropic、Google、xAI）
+
+### 60. self-improving
+**功能**: 自我反思、自我批评、自我学习、自我组织记忆  
+**使用场景**:
+- 命令、工具、API 或操作失败时
+- 用户纠正或拒绝工作时
+- 发现知识过时或不正确时
+- 发现更好的方法时
+**特点**: 
+- 分层内存结构（热/索引/项目/领域/归档）
+- 自动评估和改进
+- 知识随时间复合增长
+
 ---
 
 ## 代码质量类
 
-### 31. code-simplifier
+### 61. code-simplifier
 **功能**: 简化和优化代码以提高清晰度、一致性和可维护性  
 **使用场景**: 需要重构和改进代码质量  
 **特点**: 
@@ -442,21 +592,21 @@
 - 应用项目特定的最佳实践
 - 优先考虑可读、明确的代码
 
-### 32. verification-before-completion
+### 62. verification-before-completion
 **功能**: 完成前的验证检查  
 **使用场景**: 
 - 声称工作完成、修复或通过之前
 - 提交或创建 PR 之前
 **原则**: 证据先于断言 - 必须运行验证命令并确认输出
 
-### 33. requesting-code-review
+### 63. requesting-code-review
 **功能**: 请求代码审查的工作流  
 **使用场景**:
 - 完成任务时
 - 实现主要功能时
 - 合并前验证工作是否符合要求
 
-### 34. receiving-code-review
+### 64. receiving-code-review
 **功能**: 接收和处理代码审查反馈  
 **使用场景**: 收到代码审查反馈，在实施建议之前  
 **特点**: 
@@ -464,7 +614,7 @@
 - 不是表演性同意或盲目实施
 - 特别适用于反馈不清楚或技术上有疑问的情况
 
-### 35. skill-creator
+### 65. skill-creator
 **功能**: 创建、修改和改进 skills，测量 skill 性能  
 **使用场景**:
 - 从头创建新 skill
@@ -473,7 +623,7 @@
 - 基准测试 skill 性能和方差分析
 - 优化 skill 描述以提高触发准确性
 
-### 36. writing-skills
+### 66. writing-skills
 **功能**: 创建新 skills、编辑现有 skills 或验证 skills 在部署前是否有效  
 **使用场景**: 
 - 创建新 skills
@@ -495,45 +645,32 @@
 ## 核心工作流示例
 
 ### 完整开发流程
-```
-using-superpowers (自动)
-    ↓
-brainstorming (需求分析)
-    ↓
-writing-plans (制定计划)
-    ↓
-test-driven-development (TDD 开发)
-    ↓
-verification-before-completion (验证)
-    ↓
-requesting-code-review (代码审查)
-    ↓
-finishing-a-development-branch (完成)
-```
+
+1. **using-superpowers** (自动)
+2. ↓ **brainstorming** (需求分析)
+3. ↓ **writing-plans** (制定计划)
+4. ↓ **test-driven-development** (TDD 开发)
+5. ↓ **verification-before-completion** (验证)
+6. ↓ **requesting-code-review** (代码审查)
+7. ↓ **finishing-a-development-branch** (完成)
 
 ### 文档处理流程
-```
-doc-coauthoring (协作编写)
-    ↓
-docx/pdf/pptx (生成文档)
-    ↓
-verification-before-completion (验证)
-```
+
+1. **doc-coauthoring** (协作编写)
+2. ↓ **docx/pdf/pptx** (生成文档)
+3. ↓ **verification-before-completion** (验证)
 
 ### 设计创作流程
-```
-brainstorming (创意探索)
-    ↓
-frontend-design/canvas-design (设计实现)
-    ↓
-theme-factory (应用主题)
-```
+
+1. **brainstorming** (创意探索)
+2. ↓ **frontend-design/canvas-design** (设计实现)
+3. ↓ **theme-factory** (应用主题)
 
 ---
 
 ## 社交媒体类
 
-### 37. xurl
+### 67. xurl
 **功能**: 通过官方X API CLI与X/Twitter交互  
 **使用场景**:
 - 发帖、回复、引用、删除推文
@@ -551,7 +688,7 @@ theme-factory (应用主题)
 - 所有命令返回JSON格式输出
 **安全特性**: 严格的安全规则，禁止在代理会话中读取或传输敏感信息
 
-### 38. surf
+### 68. surf
 **功能**: AI代理的加密货币数据大脑  
 **使用场景**: 
 - 实时价格、市值、排名查询
@@ -570,15 +707,7 @@ theme-factory (应用主题)
 **工作流程**: 映射类别 → 列出端点 → 检查参数 → 执行查询 → 处理结果
 **认证**: 支持免费配额（30次/天）和付费API密钥
 
-### 39. social-media
-**功能**: 社交媒体平台交互和工作流管理  
-**使用场景**: 
-- 社交媒体发帖、读取、监控
-- 账户操作和管理
-- 跨平台社交媒体工作流
-**特点**: 集成多种社交媒体平台的标准化操作流程  
-**包含skills**: xurl等社交媒体相关工具  
-**适用平台**: X/Twitter等主流社交媒体平台
+
 
 如需了解某个 skill 的详细使用方法，可以：
 1. 查看对应文件夹中的 SKILL.md 文件
@@ -587,6 +716,6 @@ theme-factory (应用主题)
 
 ---
 
-**文档版本**: 1.1  
-**最后更新**: 2026-04-26  
-**Skills 总数**: 53
+**文档版本**: 1.2  
+**最后更新**: 2026-04-29  
+**Skills 总数**: 68
