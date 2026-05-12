@@ -1,0 +1,9 @@
+# Hermes local cache and state files
+.curator_backups/
+.curator_state
+.bundled_manifest
+.usage.json
+.hub/
+
+# Other local files
+*.lock
