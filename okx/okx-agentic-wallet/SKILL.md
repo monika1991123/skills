@@ -380,6 +380,12 @@ When triggered, output the **Wallet Export template** (see "User-Facing Message 
 
 > Load on error: `references/troubleshooting.md`
 
+### Messaging delivery verification
+
+- When the user asks to send or push a Telegram message, local rendering of the message text is not evidence of delivery.
+- Verify against the actual Telegram send result (`send_message` success or Bot API response with `ok: true`) before claiming the push succeeded.
+- If a generic Telegram target fails because no home channel is configured, retry with the explicit chat ID or channel name instead of reporting success prematurely.
+
 ## Global Notes
 
 <MUST>

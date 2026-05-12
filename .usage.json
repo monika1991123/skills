@@ -1,0 +1,80 @@
+{
+  "find-skills": {
+    "archived_at": null,
+    "created_at": "2026-05-11T08:55:53.380018+00:00",
+    "created_by": null,
+    "last_patched_at": null,
+    "last_used_at": "2026-05-11T08:55:53.385377+00:00",
+    "last_viewed_at": "2026-05-11T08:55:53.380041+00:00",
+    "patch_count": 0,
+    "pinned": false,
+    "state": "active",
+    "use_count": 1,
+    "view_count": 1
+  },
+  "okx-agentic-wallet": {
+    "archived_at": null,
+    "created_at": "2026-05-05T03:00:38.659286+00:00",
+    "created_by": null,
+    "last_patched_at": "2026-05-08T12:35:43.498494+00:00",
+    "last_used_at": "2026-05-08T12:35:31.817803+00:00",
+    "last_viewed_at": "2026-05-08T12:35:31.812727+00:00",
+    "patch_count": 1,
+    "pinned": false,
+    "state": "active",
+    "use_count": 4,
+    "view_count": 4
+  },
+  "okx-cex-market": {
+    "archived_at": null,
+    "created_at": "2026-05-08T12:18:00.798720+00:00",
+    "created_by": null,
+    "last_patched_at": null,
+    "last_used_at": "2026-05-08T12:18:00.806668+00:00",
+    "last_viewed_at": "2026-05-08T12:18:00.798758+00:00",
+    "patch_count": 0,
+    "pinned": false,
+    "state": "active",
+    "use_count": 1,
+    "view_count": 1
+  },
+  "using-superpowers": {
+    "archived_at": null,
+    "created_at": "2026-05-05T02:57:54.630460+00:00",
+    "created_by": null,
+    "last_patched_at": null,
+    "last_used_at": "2026-05-05T02:57:54.635577+00:00",
+    "last_viewed_at": "2026-05-05T02:57:54.630474+00:00",
+    "patch_count": 0,
+    "pinned": false,
+    "state": "active",
+    "use_count": 1,
+    "view_count": 1
+  },
+  "verification-before-completion": {
+    "archived_at": null,
+    "created_at": "2026-05-08T12:31:09.302603+00:00",
+    "created_by": null,
+    "last_patched_at": "2026-05-08T12:35:35.025384+00:00",
+    "last_used_at": "2026-05-08T12:35:32.832925+00:00",
+    "last_viewed_at": "2026-05-08T12:35:32.828340+00:00",
+    "patch_count": 1,
+    "pinned": false,
+    "state": "active",
+    "use_count": 2,
+    "view_count": 2
+  },
+  "writing-skills": {
+    "archived_at": null,
+    "created_at": "2026-05-12T03:04:37.571515+00:00",
+    "created_by": null,
+    "last_patched_at": null,
+    "last_used_at": "2026-05-12T08:59:06.181746+00:00",
+    "last_viewed_at": "2026-05-12T08:59:06.164852+00:00",
+    "patch_count": 0,
+    "pinned": false,
+    "state": "active",
+    "use_count": 5,
+    "view_count": 5
+  }
+}

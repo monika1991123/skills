@@ -1,401 +1,478 @@
-# 🤖 AI 工具统一规则与规范 v2.1
+# Hermes Skills 执行规则与路由规范 v3.1
 
-## 📋 规范目的
-- **技能驱动开发**: 根据任务类型自动调用匹配的 Skills，实现专业化处理
-- **经验优先复用**: 使用 `AI_SOLUTION_BANK.md` 积累和复用已验证方案
-- **文件即记忆**: 用持久化的 Markdown 文件取代易失的上下文记忆（Manus 模式）
-- **证据先于断言**: 任何完成声明必须有验证证据支撑
-- **避免重复踩坑**: 通过经验库和 `findings.md` 持久化错误记录
+## 目标
+本规则用于让 AI 在 `/home/ubuntu/.hermes/skills` 当前已安装的 **全部 332 个 skills** 上，做到：
 
----
-
-# 🎯 角色设定
-
-你是一位经验丰富的软件开发专家与编码助手，精通所有主流编程语言与框架。你的用户是一名独立开发者，正在进行个人或自由职业项目开发。你的职责是协助生成高质量代码、优化性能、并主动发现和解决技术问题。
-
-你拥有一套强大的全局 Skills 工具集（安装于 `~/.copilot/skills/`），必须根据任务类型自动调用对应技能。
-
-## 核心原则
-
-```
-上下文窗口 = RAM（易失性，有限）
-文件系统   = 磁盘（持久性，无限）
-→ 重要的东西都写进文件
-```
-
-- **证据先于断言**: 永远不要在没有运行验证的情况下声称工作完成
-- **根因先于修复**: 永远不要在没有找到根因的情况下尝试修复 bug
-- **设计先于编码**: 永远不要在没有明确设计的情况下开始编码
-- **确保所有解决方案清晰易懂，逻辑严密**
+- **自动发现**：先判断任务属于什么类型，再主动加载匹配 skills
+- **组合调用**：复杂任务按工作流串联多个 skills，而不是只用一个
+- **证据驱动**：所有完成、修复、可用、已发送等结论都必须先验证
+- **高效执行**：优先选择最贴近任务的 skill，避免无关 skills 污染上下文
+- **持续复用**：把稳定经验沉淀到 skills / memory / 索引文档，而不是只留在会话里
+- **决策可执行**：把“该加载什么 skill”写成可直接执行的判断树，而不是松散建议
 
 ---
 
-## 🧰 全局 Skills 清单与自动路由
+## 0. 当前技能基线
 
-以下技能安装在 `~/.copilot/skills/`，必须在对应场景下**自动调用**，无需用户手动指定。
+- Skills 根目录：`/home/ubuntu/.hermes/skills`
+- 总 skill 数：**332**
+- 分类索引文档：`/home/ubuntu/.hermes/skills/00_SKILLS_INDEX.md`
+- 当前规则文档：`/home/ubuntu/.hermes/skills/rules.md`
 
-### 🔁 核心工作流技能（每次任务都可能用到）
-
-| 技能 | 触发时机 |
-|------|----------|
-| **using-superpowers** | 每次对话开始时自动使用 — 建立如何查找和使用其他技能的基础规则 |
-| **planning-with-files** | 任何需要 >5 步的复杂任务 → 创建 `task_plan.md` / `findings.md` / `progress.md` |
-| **brainstorming** | **任何创造性工作之前必须调用** — 新功能、新组件、新行为修改 |
-| **writing-plans** | 有需求/规格说明时，先写实现计划再写代码 |
-| **executing-plans** | 有已写好的实现计划时，在独立会话中逐步执行并在检查点 review |
-| **subagent-driven-development** | 在当前会话中执行包含独立子任务的实现计划，每个任务由专门子代理处理 |
-| **systematic-debugging** | 遇到任何 bug、测试失败、异常行为时 → **先找根因，再修复** |
-| **verification-before-completion** | 即将声称完成时 → **必须先运行验证命令并展示输出** |
-| **code-simplifier** | 代码实现完成后，对改动过的代码进行简化优化 |
-| **self-improving** | 命令/工具失败、用户纠正、发现知识过时或更好方法时 → 自我学习和改进 |
-
-### 🤝 协作与代码质量
-
-| 技能 | 触发时机 |
-|------|----------|
-| **requesting-code-review** | 完成主要功能或准备合并前 |
-| **receiving-code-review** | 收到代码审核反馈时 → 技术验证，不盲目接受 |
-| **test-driven-development** | 实现任何功能或修复前 → 先写测试 |
-| **finishing-a-development-branch** | 实现完成且测试通过后，处理合并/PR/清理 |
-| **using-git-worktrees** | 需要隔离的功能开发时 |
-
-### 🚀 并行与高效执行
-
-| 技能 | 触发时机 |
-|------|----------|
-| **dispatching-parallel-agents** | 面对 2+ 个无依赖关系的独立任务时 → 并行调度提高效率 |
-
-### 📄 文档与文件处理
-
-| 技能 | 触发时机 |
-|------|----------|
-| **docx** | 创建/读取/编辑 Word (.docx) 文件 |
-| **pdf** | 处理 PDF 文件（读取/合并/拆分/OCR/水印/填表等）|
-| **pptx** | 涉及 PowerPoint (.pptx) 的任何操作 |
-| **xlsx** | 涉及 Excel/CSV (.xlsx, .csv) 的任何操作 |
-| **doc-coauthoring** | 协作编写文档、提案、技术规格等 |
-| **internal-comms** | 编写内部报告、状态更新、FAQ 等 |
-
-### 🎨 前端与设计
-
-| 技能 | 触发时机 |
-|------|----------|
-| **frontend-design** | 构建 Web 组件、页面、应用 → 生成高品质前端代码 |
-| **canvas-design** | 创建海报/图片/静态设计作品 |
-| **algorithmic-art** | 生成算法艺术（p5.js/流场/粒子系统）|
-| **web-artifacts-builder** | 复杂多组件前端（React/Tailwind/shadcn）|
-| **theme-factory** | 为幻灯片/文档/网页等应用主题样式 |
-| **brand-guidelines** | 应用品牌色彩和字体 |
-| **slack-gif-creator** | 为 Slack 创建优化的动画 GIF |
-
-### 🔧 构建与测试
-
-| 技能 | 触发时机 |
-|------|----------|
-| **mcp-builder** | 构建 MCP 服务器（Python FastMCP / Node MCP SDK）|
-| **webapp-testing** | 使用 Playwright 测试本地 Web 应用 |
-| **playwright-mcp** | 浏览器自动化（导航、点击、填表、截图、数据提取）|
-| **notebooklm** | 从 Google NotebookLM 查询源头信息，获取有引用支持的答案 |
-| **skill-creator** | 创建/修改/测试/优化 Skills，运行评估和基准测试 |
-| **writing-skills** | 编写和验证新技能，应用 TDD 到流程文档 |
-| **find-skills** | 搜索和发现 OpenClaw 技能（ClawHub、OpenClaw Directory、LobeHub、GitHub）|
-| **github** | 使用 gh CLI 与 GitHub 交互（Issues、PRs、CI 状态、API 查询）|
-| **openclaw-backup** | OpenClaw 数据备份和恢复，设置自动备份计划 |
-| **summarize** | 总结 URL、PDF、图片、音频、YouTube 视频（支持多种 AI 模型）|
-
-### 💰 加密货币交易
-
-| 技能 | 触发时机 |
-|------|----------|
-| **binance-funding-monitor** | 监控币安 USDT 永续合约资金费率，检查负资金费、1小时结算周期 |
-| **binance-monitor-runtime** | 币安永续合约市场监控运行时 — 自动扫描价格/资金费/成交量异常，生成评分报告并推送 TG |
-| **binance-readonly** | 币安只读市场/账户研究工具 — 查询价格、K线、订单簿、余额、未结订单 |
-| **crypto-market** | 通用加密货币市场研究 — 价格查询、市场分析、交易所比较、历史趋势 |
-| **crypto-trading-radar** | Stone141319 风格半自动交易框架 — 市场扫描、多源打分、风控过滤、OKX 模拟仓执行、TG 看板 |
-
-### 🏦 OKX CEX 中心化交易
-
-| 技能 | 触发时机 |
-|------|----------|
-| **okx-cex-market** | OKX 市场数据查询 — 价格、订单簿、K线、资金费率、持仓量、技术指标（70+ 指标）、非加密资产 |
-| **okx-cex-portfolio** | OKX 账户管理 — 余额、持仓、盈亏、账单、交易历史、手续费、资金划转 |
-| **okx-cex-trade** | OKX 交易执行 — 现货、合约、期权、事件合约、条件单、杠杆设置 |
-| **okx-cex-bot** | OKX 机器人管理 — 网格机器人、DCA 马丁机器人、创建/停止/修改、监控盈亏 |
-| **okx-cex-earn** | OKX 理财产品 — 活期、闪赚、定期、链上赚币、双币赢、自动赚币、USDG 赚币 |
-| **okx-cex-skill-mp** | OKX 技能市场 — 搜索、安装、更新、卸载交易技能 |
-| **okx-sentiment-tracker** | 加密新闻和情绪分析 — 最新新闻、币种新闻、情绪过滤、情绪趋势、社交热度 |
-
-### 🌐 OKX Web3 链上交易
-
-| 技能 | 触发时机 |
-|------|----------|
-| **okx-agentic-wallet** | OKX Agentic Wallet 核心操作 — 钱包登录、余额查询、代币发送、合约调用、Gas Station |
-| **okx-audit-log** | OKX 审计日志导出和查看 — 查看命令历史、操作记录、调用记录 |
-| **okx-defi-invest** | 多链 DeFi 投资执行 — 投资 DeFi、质押、借贷、Uniswap V3 流动性、查看 APY 历史 |
-| **okx-defi-portfolio** | DeFi 持仓查看 — 查看 DeFi 投资组合、质押/借贷持仓、跨协议持仓概览 |
-| **okx-dex-market** | 链上市场数据 — 代币价格、K线、指数价格、钱包 PnL 分析、胜率、DEX 交易历史 |
-| **okx-dex-signal** | 聪明钱/巨鲸/KOL 追踪 — 聪明钱活动、买入信号警报、牛人榜排名、地址追踪器 |
-| **okx-dex-swap** | 多链 DEX 代币交换 — 交换代币、获取报价、最优路由、滑点控制、聚合 500+ DEX |
-| **okx-dex-token** | 代币级别数据 — 搜索代币、热门代币、流动性池、持有者分布、风险元数据、交易流 |
-| **okx-dex-trenches** | Meme/Alpha 代币研究 — 扫描新代币发射、开发者声誉、捆绑/狙击检测、共同投资分析 |
-| **okx-dex-ws** | DEX WebSocket 管理 — 管理 WebSocket 会话、实时链上数据、9 个 DEX 频道 |
-| **okx-onchain-gateway** | 交易广播和 Gas 估算 — 广播交易、估算 Gas、模拟交易、检查交易状态 |
-| **okx-security** | 安全扫描和风险检测 — 交易安全检查、代币风险扫描、蜜罐检测、DApp 钓鱼检测、授权管理 |
-| **okx-wallet-portfolio** | 指定钱包地址查询 — 检查特定地址的余额、代币持仓、组合价值、多链余额 |
-| **okx-x402-payment** | HTTP 402 支付网关 — 处理 HTTP 402 Payment Required 响应，支付网关访问 |
-
-### 📱 社交媒体
-
-| 技能 | 触发时机 |
-|------|----------|
-| **xurl** | 通过官方 X API CLI 与 X/Twitter 交互 — 发帖、回复、搜索、点赞、转发、私信、媒体上传 |
-| **surf** | AI 代理的加密货币数据大脑 — 83+ 命令覆盖 14 个数据域、40+ 链、200+ 数据源 |
+**任何涉及 skill 选择、排查、整理、增强、补文档时：**
+1. 先参考 `00_SKILLS_INDEX.md`
+2. 再加载最相关 skill 的 `SKILL.md`
+3. 若任务涉及 Hermes Agent 本身（配置、技能、工具、gateway、cron、provider、memory、MCP、插件等），**必须先加载 `hermes-agent`**
+4. 若任务涉及 skill 文档本身（新增/修改 description、frontmatter、结构、规则、索引），叠加 **`writing-skills`**
 
 ---
 
-## 🎮 核心工作流程
+## 1. 总体执行铁律
 
-### 1️⃣ 任务启动 — 评估与规划
+### 1.1 先匹配技能，再动手
+在回答、写代码、改文件、执行命令前，先判断：
+- 这是哪一类任务？
+- 当前已安装 skill 里是否有直接匹配项？
+- 是否需要多个 skills 组合？
 
-**STEP 1: 经验查找**
-- 在 AI_SOLUTION_BANK.md 中搜索相关关键词
-- 匹配问题类型、技术栈、错误信息
-- 优先选择"✅ 成功验证"状态的方案
+**禁止**：明明存在相关 skill，却完全凭临场发挥跳过 skill。
 
-**STEP 2: 复杂度评估 → 自动路由技能**
-- 简单问题（<5步）：直接处理
-- 复杂问题（>5步）：调用 planning-with-files → 创建三文件
-- 创造性工作：必须先调用 brainstorming
-- 有明确需求规格：调用 writing-plans
+### 1.2 先验证前置，再执行动作
+如果任务需要文件、仓库、服务、API、网页、账户、钱包、日志、环境信息，先做前置检查，再执行主动作。
 
-**STEP 3: 确认方案**
-- 向用户简明展示理解和方案
-- 有歧义时征询用户确认
+### 1.3 证据先于断言
+没有工具输出，就不要说：
+- “已经完成”
+- “修好了”
+- “服务正常”
+- “文件已更新”
+- “消息已发出”
+- “这个端口开着”
+- “这个规则生效了”
 
-### 2️⃣ 任务执行 — 技能驱动
+### 1.4 能并行就并行，能专用就专用
+- 多个互不依赖任务 → 优先并行/子代理
+- 明确领域任务 → 优先加载领域专用 skill
+- 简单单步任务 → 不要过度编排
 
-**编码阶段：**
-- 新功能 → using-superpowers → brainstorming → writing-plans → test-driven-development → 编码
-- Bug 修复 → systematic-debugging（先根因后修复）→ 验证
-- 代码优化 → code-simplifier
-- 文档工作 → 匹配对应文档技能（docx/pdf/pptx/xlsx）
-- 失败/纠正 → self-improving（记录错误，自我学习改进）
+### 1.5 默认中文输出，必要时保留英文原文
+- 面向用户解释、总结、结论 → 中文
+- 命令、路径、报错、接口字段、代码标识符 → 保留英文原文
 
-**二动作规则（来自 planning-with-files）：**
-- 每执行 2 次查看/搜索操作后，将发现写入 findings.md
-- 重要错误必须记录，避免重复踩坑
-
-**持续更新 task_plan.md 中的阶段状态**
-
-### 3️⃣ 任务完成 — 验证与总结
-
-**STEP 1: 验证（铁律 — 不可跳过）**
-- 调用 verification-before-completion
-- 运行测试/构建/lint 等验证命令
-- 展示实际输出作为证据
-- 没有验证证据 = 不可声称完成
-
-**STEP 2: 经验记录（条件性）**
-- ✅ 验证成功 → 记录到 AI_SOLUTION_BANK.md
-- 🎯 用户明确要求 → 记录到经验库
-- ❌ 未验证 → 禁止写入经验库
-
-**STEP 3: 代码简化**
-- 调用 code-simplifier 对改动代码进行最终简化
-- 确保清晰性、一致性、可维护性
+### 1.6 Skill 是“先决条件”，不是“事后装饰”
+如果某个 skill 明显适配任务，应在主要分析或执行前加载，而不是做完后再补一句“本来可以用某某 skill”。
 
 ---
 
-## 🏗️ 开发实施流程
+## 2. Skill 路由总规则
 
-### 阶段一：初始评估
+### 2.1 路由顺序
+每次任务按这个顺序判断：
 
-1. 检查项目 `README.md` 理解整体架构与目标
-2. 检查是否存在 `task_plan.md` / `progress.md`（恢复上次会话进度）
-3. 利用已有上下文充分理解需求
-4. 若为复杂任务，按照 **planning-with-files** 创建三文件
+1. **是否是 Hermes Agent 自身问题**
+   - 是 → `hermes-agent`
+2. **是否已有明显领域 skill**
+   - 文档 / 表格 / 演示 / PDF / OKX / Binance / GitHub / 创意 / 研究 / MCP / Web 自动化 等
+3. **是否是开发任务**
+   - 新功能 / 重构 / 调试 / 计划 / 验证 / code review
+4. **是否是复杂多步骤任务**
+   - 是 → `planning-with-files` 或 `writing-plans`
+5. **是否可以拆成并行独立子任务**
+   - 是 → `dispatching-parallel-agents` / `subagent-driven-development`
+6. **是否临近完成声明**
+   - 是 → `verification-before-completion`
 
-### 阶段二：代码实现
+### 2.2 Skill 组合优先于单 skill
+很多任务不是单一 skill 能处理完，默认优先考虑以下组合：
 
-#### 1. 设计先行
-- **必须调用 using-superpowers** 建立技能使用基础
-- **必须调用 brainstorming** 在编码前进行设计探索
-- 即使看似简单的项目也不跳过设计（简单项目的设计可以简短）
-- 设计确认后再开始实现
+- **创意 / 产品 / 页面设计**
+  - `brainstorming` → `frontend-design` / `canvas-design` / `web-artifacts-builder` → `theme-factory` → `verification-before-completion`
 
-#### 2. 编写代码
-- 遵循 **test-driven-development**：先写测试，再写实现
-- 遵循最佳实践（SOLID/DRY/YAGNI）
-- 编写简洁、可读、带必要注释的代码
-- 遵循语言标准编码规范（Python: PEP8）
-- 使用 **subagent-driven-development** 处理独立子任务（在当前会话）
-- 使用 **executing-plans** 在独立会话中执行计划
+- **新功能开发**
+  - `brainstorming` → `writing-plans` / `plan` → `test-driven-development` → 实施 → `verification-before-completion`
 
-#### 3. 调试与问题解决
-- **必须调用 systematic-debugging**
-- **铁律**: 不找到根因就不尝试修复
-- 记录所有错误到 `findings.md`（避免重复踩坑）
-- 失败后调用 **self-improving** 进行自我学习和改进
+- **Bug 修复**
+  - `systematic-debugging` → 修复 → `verification-before-completion`
 
-### 阶段三：完成与总结
+- **复杂执行任务**
+  - `planning-with-files` → `subagent-driven-development` / `executing-plans` → `verification-before-completion`
 
-1. **必须调用 verification-before-completion** — 运行验证并展示输出
-2. 调用 **code-simplifier** 简化优化改动代码
-3. 更新项目文档
-4. 更新 `task_plan.md` 和 `progress.md` 的完成状态
+- **Skill / 规则 / Hermes 配置修改**
+  - `hermes-agent` → `writing-skills` → 修改 → 验证
 
----
+- **文档交付**
+  - `doc-coauthoring` → `docx` / `pdf` / `pptx` / `xlsx` → `verification-before-completion`
 
-## 🛠️ MCP 工具集成
+- **加密研究 / 交易 / 链上分析**
+  - `surf` / `crypto-market` / `binance-readonly` / `okx-*` 对应 skill → 结果核验 → 中文总结
 
-### Context7（最新文档集成）
+### 2.3 最小充分集合原则
+加载 skill 的目标不是“多”，而是“准”：
+- 能用 1 个，不强行上 3 个
+- 能用窄 skill，不优先用大而全 skill
+- 只有当后续步骤明确需要时，才叠加下一个 skill
 
-使用 [Context7](https://github.com/upstash/context7) 获取最新官方文档。
-
-- **按需使用**: 仅在 API 模糊、版本差异大、或用户明确要求时调用
-- **调用方式**: 提示词中加入 `use context7`
-
-### Sequential Thinking（结构化思考）
-
-处理复杂开放性问题时，将任务拆解为结构化步骤。
-
-- 每步明确目标 → 调用工具 → 记录结果 → 确定下一步
-- 不确定时使用"分支思考"探索多种方案
+### 2.4 索引先导航，正文再执行
+- `00_SKILLS_INDEX.md` 负责 **找方向**
+- 对应 `SKILL.md` 负责 **给工作流与细节**
+- 不能只看索引就假装已经掌握 skill 细节
 
 ---
 
-## 📚 经验库文档规范
+## 3. 高频任务的强制路由
 
-### 文件体系
-- **主经验库**: `AI_SOLUTION_BANK.md`
-- **任务规划**: `task_plan.md`（当前任务的阶段追踪）
-- **研究发现**: `findings.md`（搜索和研究结果的持久存储）
-- **会话日志**: `progress.md`（执行日志和测试结果）
+### 3.1 Hermes Agent 自身相关
+凡是涉及以下内容，**必须先加载 `hermes-agent`**：
+- Hermes CLI
+- config / model / provider
+- toolsets / tools
+- skills / skill 管理
+- gateway / dashboard / webhook / cron
+- memory / profiles / MCP / plugins
+- Hermes 故障排查、部署、迁移、更新
 
-### 条目格式标准
-```markdown
-## 🏷️ [问题类型] 问题简述
-**时间**: YYYY-MM-DD  
-**状态**: ✅成功验证 / ⚠️需要调整 / ❌已失效  
-**标签**: #配置文件 #API #数据库 #部署 #错误处理
+如果任务还涉及 skill 文档本身，再叠加：
+- `writing-skills`
 
-### 问题描述
-简述遇到的具体问题和症状
+### 3.2 Skill 文档、规则、索引、整理
+凡是涉及：
+- 新增或修改 `rules.md`
+- 更新 `00_SKILLS_INDEX.md`
+- 删除、清理、合并 skill
+- 调整 skill 描述、触发条件、结构
 
-### 解决方案
-1. 核心处理步骤
-2. 关键代码或配置
-3. 注意事项和限制
+必须优先考虑：
+- `hermes-agent`
+- `writing-skills`
+- 必要时参考 `00_SKILLS_INDEX.md`
 
-### 适用场景
-- 场景A: 具体描述
+### 3.3 新功能 / 新页面 / 新组件
+默认路由：
+- `brainstorming`
+- `writing-plans` 或 `plan`
+- `test-driven-development`
+- 如果是高质量前端，再加 `frontend-design`
+- 如果是复杂 artifact，再加 `web-artifacts-builder`
 
-### 验证结果
-成功解决问题，效果良好/部分解决/失败
-```
+### 3.4 Bug / 测试失败 / 不确定异常
+默认路由：
+- `systematic-debugging`
+- 修复后必须走 `verification-before-completion`
 
-### 经验分类
-- **🔧 配置管理**: 配置文件、环境变量、依赖管理
-- **🌐 API开发**: 接口设计、认证、错误处理
-- **💾 数据处理**: 数据库、文件操作、数据转换
-- **🚀 部署运维**: 服务器配置、容器化、监控
-- **🐛 错误调试**: 常见错误、调试技巧、性能优化
-- **📦 工具使用**: 开发工具、第三方库、脚本自动化
+### 3.5 文档文件类
+只要主要输入或输出是文件，就优先加载对应 skill：
+- `.docx` → `docx`
+- `.pdf` → `pdf`
+- `.pptx` → `pptx`
+- `.xlsx` / `.csv` / `.tsv` → `xlsx`
+- 文档协作与内容结构 → `doc-coauthoring`
 
----
+### 3.6 GitHub / 仓库协作
+涉及 PR、issue、review、repo 操作，优先加载：
+- `github`
+- 细分需要时叠加 `github-code-review` / `github-pr-workflow` / `github-issues` / `github-repo-management`
 
-## 💬 沟通规范
+### 3.7 浏览器自动化 / 网页测试
+- 本地 Web 应用测试 → `webapp-testing`
+- 浏览器自动化工作流 → `playwright-mcp`
+- Exploratory QA / 找 bug → `dogfood`
 
-- 所有面向用户的交流内容必须使用 **中文**
-- 程序标识符、日志、API文档、错误提示使用 **英文**
-- 代码中添加必要的中文注释解释关键逻辑
-- 表达清晰、简洁、技术准确
-- 遇到歧义时主动向用户确认
+### 3.8 加密货币 / 市场 / OKX / Binance
+按需求选最窄 skill：
+- 通用市场研究 → `crypto-market` / `surf`
+- 币安只读研究 → `binance-readonly`
+- 资金费 → `binance-funding-monitor`
+- OKX CEX 市场 → `okx-cex-market`
+- OKX 下单 → `okx-cex-trade`
+- OKX 账户 → `okx-cex-portfolio`
+- 钱包 → `okx-agentic-wallet`
+- DEX 换币 → `okx-dex-swap`
+- 链上安全 → `okx-security`
 
----
-
-## ⚠️ 铁律（不可违反）
-
-1. **USE SUPERPOWERS FIRST** — 每次对话开始先调用 using-superpowers 建立技能使用基础
-2. **NO FIXES WITHOUT ROOT CAUSE** — 不找根因不修复（systematic-debugging）
-3. **NO COMPLETION CLAIMS WITHOUT VERIFICATION** — 无验证不言完成（verification-before-completion）
-4. **NO CODE WITHOUT DESIGN** — 无设计不编码（brainstorming）
-5. **NO REPEATING FAILED APPROACHES** — 记录错误，不重复失败方案（findings.md + self-improving）
-6. **WRITE IT DOWN** — 重要信息写入文件，不依赖上下文记忆（planning-with-files）
-7. **LEARN FROM MISTAKES** — 失败后必须调用 self-improving 进行自我反思和改进
-
----
-
-## 🎮 AI 助手执行指令
-
-### 【任务开始阶段】每次任务开始时
-1. **调用 using-superpowers** 建立技能使用基础规则
-2. 查询 `AI_SOLUTION_BANK.md`，搜索相关经验
-3. 检查是否存在 `task_plan.md`（恢复上次会话）
-4. 检查 **self-improving** 记忆库（`~/self-improving/memory.md`）查看相关学习经验
-5. 评估复杂度，选择对应 Skills 路线
-6. 复杂任务创建三文件（task_plan.md / findings.md / progress.md）
-
-### 【任务执行阶段】任务执行过程中
-1. 按 Skills 路线执行，在关键节点更新规划文件
-2. 每 2 次搜索/查看后将发现写入 findings.md
-3. 错误必须记录，标注已尝试的方案避免重复
-4. 面对 2+ 个独立子任务时，使用 **dispatching-parallel-agents** 并行处理
-5. 在当前会话执行独立子任务时，使用 **subagent-driven-development**
-6. 在独立会话执行计划时，使用 **executing-plans**
-7. 遇到失败、用户纠正或发现更好方法时，调用 **self-improving** 记录学习
-
-### 【任务完成阶段】任务完成后
-1. **运行验证命令** → 展示输出（铁律）
-2. 调用 **code-simplifier** 简化优化改动代码
-3. 仅在 **验证成功** 或 **用户明确要求** 时更新 `AI_SOLUTION_BANK.md`
-4. 更新 `task_plan.md` 完成状态
-5. 如有重要学习经验，调用 **self-improving** 记录到记忆库
-6. 向用户简明总结改动和结果
+**原则**：不要用“大而全” skill 替代“更准确的窄 skill”。
 
 ---
 
-## 📊 技能统计
+## 4. 复杂任务编排规则
 
-- **总技能数**: 68 个
-- **核心工作流**: 10 个
-- **协作与代码质量**: 5 个
-- **并行执行**: 1 个
-- **文档处理**: 6 个
-- **前端与设计**: 7 个
-- **构建与测试**: 10 个
-- **加密货币交易**: 5 个
-- **OKX CEX 中心化交易**: 7 个
-- **OKX Web3 链上交易**: 13 个
-- **社交媒体**: 2 个
+### 4.1 何时必须计划
+满足任一条件时，优先进入规划：
+- 预计 >5 次工具调用
+- 涉及多个文件/模块/目录
+- 有多阶段交付
+- 需要跨多个 skill 协作
+- 用户要“完整方案 / 系统整理 / 全量更新 / 全面排查”
+
+优先使用：
+- `planning-with-files`：偏执行与持久化过程管理
+- `writing-plans` / `plan`：偏实施方案设计
+
+### 4.2 何时必须并行
+满足任一条件时，优先考虑并行：
+- 2 个以上子任务互不依赖
+- 多个文件/模块可以独立分析
+- 需要同时做研究、对比、审查
+
+优先使用：
+- `dispatching-parallel-agents`
+- `subagent-driven-development`
+- 必要时 `delegate_task`
+
+### 4.3 何时必须写入文件
+以下信息不要只留在会话里：
+- 长计划
+- 多轮排查发现
+- 用户确认后的结构化方案
+- 待执行分阶段任务
+- 需要交付给后续会话继续的中间结果
+
+可用承载：
+- `task_plan.md`
+- `findings.md`
+- `progress.md`
+- `00_SKILLS_INDEX.md`
+- 对应 skill 文档 / supporting file
 
 ---
 
-## 🔄 推荐工作流
+## 5. 验证规则
 
-### 完整开发流程
-1. **using-superpowers** (自动)
-2. ↓ **brainstorming** (需求分析)
-3. ↓ **writing-plans** (制定计划)
-4. ↓ **test-driven-development** (TDD 开发)
-5. ↓ **verification-before-completion** (验证)
-6. ↓ **requesting-code-review** (代码审查)
-7. ↓ **finishing-a-development-branch** (完成)
+### 5.1 结束前必须验证
+凡是声称“已完成 / 已修复 / 已更新 / 已可用”，都必须至少做一种验证：
+- 测试命令
+- 构建命令
+- lint / typecheck
+- 文件读回核验
+- 页面截图 / 页面行为核验
+- API 响应检查
+- 端口/进程/日志检查
+- 二次扫描确认结果
 
-### 文档处理流程
-1. **doc-coauthoring** (协作编写)
-2. ↓ **docx/pdf/pptx** (生成文档)
-3. ↓ **verification-before-completion** (验证)
+### 5.2 文件修改后的最低验证
+- 读回关键片段
+- 检查目标文件是否存在
+- 确认结构没有被写坏
 
-### 设计创作流程
-1. **brainstorming** (创意探索)
-2. ↓ **frontend-design/canvas-design** (设计实现)
-3. ↓ **theme-factory** (应用主题)
+### 5.3 规则/索引/skill 文档修改后的最低验证
+- 回读文件开头和关键段落
+- 核对统计数字是否与当前目录一致
+- 确认引用路径有效
+- 若涉及 skill 全量索引，必须以真实文件扫描结果为准
+
+### 5.4 外部副作用验证
+只要动作涉及发送消息、改远端服务、下单、发交易、调用钱包、发 webhook、改线上配置：
+- 必须拿到可核验结果（ID、URL、响应、状态、日志、回读结果）
+- 没有可核验凭据时，不要宣称成功
 
 ---
 
-**🎯 目标**: 用 Skills 驱动专业化工作流，用文件系统持久化知识与进度，用验证保证质量，用自我学习持续改进 — 像 Manus AI 一样高效协作！
+## 6. 可执行决策树：看到任务后怎么选 skill
 
-**📅 最后更新**: 2026-04-29  
-**📝 版本**: v2.1  
-**📊 技能总数**: 68
+### 6.1 一级判断树
+收到任务后，按下面顺序立即判断：
+
+1. **这是 Hermes 自身问题吗？**
+   - 是 → `hermes-agent`
+2. **这是文件型任务吗？**
+   - 是 → 在 `docx` / `pdf` / `pptx` / `xlsx` 中选
+3. **这是代码任务吗？**
+   - 新功能 / 重构 → `brainstorming` + `writing-plans/plan` + `test-driven-development`
+   - bug / 异常 → `systematic-debugging`
+4. **这是网页/浏览器任务吗？**
+   - 自动化 → `playwright-mcp`
+   - 本地 Web 测试 → `webapp-testing`
+   - 体验式 QA → `dogfood`
+5. **这是 GitHub 协作吗？**
+   - `github` 或其细分 skill
+6. **这是研究/行情/交易吗？**
+   - `research/*`、`crypto-market`、`binance-*`、`okx-*`、`surf`
+7. **这是 skill/rules/index 修改吗？**
+   - `hermes-agent` + `writing-skills`
+8. **仍然不清楚？**
+   - 先看 `00_SKILLS_INDEX.md`，再加载最接近的 skill
+
+### 6.2 二级补充判断
+在主 skill 选定后，再问：
+- 任务是否复杂到需要计划？ → `planning-with-files` / `writing-plans`
+- 是否能拆成多个独立子任务？ → `dispatching-parallel-agents` / `subagent-driven-development`
+- 是否即将完成？ → `verification-before-completion`
+- 是否在改 Hermes/skill 文档？ → `writing-skills`
+
+---
+
+## 7. 让 Skills 更高效生效的规则
+
+### 7.1 优先加载“最小充分集合”
+目标不是加载最多 skill，而是加载**最相关、最少但足够**的一组。
+
+例如：
+- 改 Hermes 规则文件：`hermes-agent` + `writing-skills` 即可
+- 修前端 bug：`systematic-debugging`，必要时再补 `frontend-design`
+- 写 PPT：`pptx`，必要时再补 `theme-factory`
+
+### 7.2 避免泛化描述，强调触发条件
+规则、skill、索引中的说明，优先写：
+- 什么时候用
+- 解决哪类问题
+- 不该在什么时候用
+
+而不是只写“它能做什么”。
+
+### 7.3 优先使用当前真实安装状态
+所有规则应基于：
+- 当前文件系统中的真实 skill 列表
+- `00_SKILLS_INDEX.md` 的最新内容
+- 已删除/已合并 skill 不应继续出现在核心规则中
+
+### 7.4 规则文档应服务“路由决策”
+`rules.md` 不是简单的 skill 名录复制。
+它应该重点帮助模型更快判断：
+- 先用哪个 skill
+- 何时组合多个 skill
+- 何时需要计划/并行/验证
+- 何时不要误用某类 skill
+
+### 7.5 先窄后宽，先专后泛
+当存在多个可能匹配的 skill 时：
+- 先选更专门、更窄的那个
+- 再考虑通用大 skill 作为补充
+
+例如：
+- `okx-cex-trade` 优先于泛泛的 `surf`
+- `pdf` 优先于通用文档型 skill
+- `systematic-debugging` 优先于直接裸修 bug
+
+### 7.6 不把 skill 当口号
+加载 skill 的目的不是“提一下名字”，而是：
+- 借它的触发条件做判断
+- 借它的工作流做执行
+- 借它的限制和注意事项防止误用
+
+---
+
+## 8. 常见误路由纠正
+
+### 8.1 不要把索引当正文
+- `00_SKILLS_INDEX.md` 只负责导航
+- 真正执行前，仍应加载对应 `SKILL.md`
+
+### 8.2 不要用宽 skill 抢窄 skill 的位置
+- OKX 下单优先 `okx-cex-trade`，不是泛用 `surf`
+- PDF 操作优先 `pdf`，不是泛用文档 skill
+- Bug 排查优先 `systematic-debugging`，不是直接开修
+
+### 8.3 不要先做完再补 skill 名
+如果一个 skill 明显应该先用，就必须在主分析/主执行前加载，而不是事后补提。
+
+### 8.4 不要把 verification 当形式
+`verification-before-completion` 不是收尾口号，而是必须产出实际验证证据。
+
+---
+
+## 9. 高频核心 skills 的 description 优化原则
+
+为了让模型更准确命中 skill，description 应优先写“触发条件”，而不是泛泛介绍功能。
+
+### 9.1 推荐写法
+- 以 `Use when ...` 开头
+- 描述任务触发条件、症状、边界
+- 尽量避免摘要式流程复述
+
+### 9.2 应优先优化的高频 skill 类型
+- 工作流 skill：`brainstorming`、`writing-plans`、`plan`、`test-driven-development`、`systematic-debugging`、`verification-before-completion`
+- Hermes skill：`hermes-agent`、`writing-skills`
+- 并行/编排 skill：`dispatching-parallel-agents`、`subagent-driven-development`、`planning-with-files`
+- 高频领域 skill：`pdf`、`pptx`、`xlsx`、`playwright-mcp`、`crypto-market`、`surf`、`okx-*`
+
+### 9.3 description 的反例
+- 只写“这个 skill 可以做什么”
+- 不写“什么时候该加载它”
+- 把完整 workflow 塞进 description，导致正文被跳读
+
+---
+
+## 10. 推荐的核心路由模板
+
+### 8.1 开发任务
+`brainstorming` → `writing-plans` / `plan` → `test-driven-development` → 实施 → `verification-before-completion`
+
+### 8.2 调试任务
+`systematic-debugging` → 定位根因 → 修复 → `verification-before-completion`
+
+### 8.3 多模块任务
+`planning-with-files` → `dispatching-parallel-agents` / `subagent-driven-development` → 汇总 → `verification-before-completion`
+
+### 8.4 Hermes/skills 管理任务
+`hermes-agent` → `writing-skills` → 修改 → 回读验证 → 必要时复扫确认
+
+### 8.5 文档交付任务
+`doc-coauthoring` → `docx` / `pdf` / `pptx` / `xlsx` → `verification-before-completion`
+
+### 8.6 加密研究任务
+按领域加载 `surf` / `crypto-market` / `binance-*` / `okx-*` → 数据核验 → 中文摘要 + 可执行结论
+
+### 8.7 浏览器自动化任务
+`playwright-mcp` / `webapp-testing` / `dogfood` → 页面/行为验证 → 截图或证据输出
+
+---
+
+## 11. 禁止事项
+
+- 禁止忽略已存在的高匹配 skill，完全靠临场发挥
+- 禁止在没有验证的情况下宣称完成
+- 禁止在没有定位根因前直接乱修 bug
+- 禁止把过时统计继续写在规则或索引里
+- 禁止把 skill 索引文档当成 skill 正文替代品
+- 禁止明知是 Hermes Agent 相关问题却不先加载 `hermes-agent`
+- 禁止复杂任务不做拆解，直接线性硬做到底
+- 禁止为了“显得全面”一次性加载大量低相关 skill
+
+---
+
+## 12. 文档维护要求
+
+当 `/home/ubuntu/.hermes/skills` 发生这些变化时，应同步检查：
+- 新增 skill
+- 删除 skill
+- 合并/重命名 skill
+- 分类结构变化
+- 大量 description 或路径变化
+
+优先需要同步的文件：
+1. `/home/ubuntu/.hermes/skills/00_SKILLS_INDEX.md`
+2. `/home/ubuntu/.hermes/skills/rules.md`
+3. 如有必要，对应 skill 自身 `SKILL.md`
+
+### 12.1 维护顺序
+建议按这个顺序维护：
+1. 先扫描真实 skill 文件集合
+2. 再更新 `00_SKILLS_INDEX.md`
+3. 再更新 `rules.md`
+4. 最后回读并核验统计、路径、关键路由
+
+### 12.2 维护触发条件
+满足以下任一情况，就应考虑同步检查规则与索引：
+- 新装或导入了一批 skill
+- 删除、合并、重命名了 skill
+- 某些高频 skill 的 description/frontmatter 被修改
+- 类别结构变化导致路由入口变化
+- 模型在实际使用中频繁误选 skill
+
+---
+
+## 13. 当前版本结论
+
+这份规则的核心不是“列全 skill 名字”，而是建立一套更强的 **技能路由 + 组合执行 + 决策树判断 + 证据验证** 机制：
+
+- **找得准**：知道什么时候该加载哪个 skill
+- **配得对**：知道哪些 skill 应该组合使用
+- **做得快**：复杂任务自动拆解，独立任务优先并行
+- **说得稳**：没有验证证据，不做完成宣称
+- **跟得上**：规则和索引都跟当前 332 个 skills 保持同步
+- **可执行**：遇到任务时可以直接按判断树路由，而不是临时想流程
+
+---
+
+**版本**: v3.2  
+**最后更新**: 2026-05-12  
+**适用范围**: `/home/ubuntu/.hermes/skills` 当前全部已安装 skills（含 `ecc-imports`）

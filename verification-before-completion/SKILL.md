@@ -48,6 +48,7 @@ Skip any step = lying, not verifying
 | Regression test works | Red-green cycle verified | Test passes once |
 | Agent completed | VCS diff shows changes | Agent reports "success" |
 | Requirements met | Line-by-line checklist | Tests passing |
+| Message delivered / notification sent | Fresh send result from the actual messaging tool or API | Printing the message text locally, assuming the bot will send it, or treating local script output as delivery evidence |
 
 ## Red Flags - STOP
 

@@ -1,0 +1,8 @@
+{
+  "taps": [
+    {
+      "repo": "https://github.com/affaan-m/everything-claude-code",
+      "path": "skills/"
+    }
+  ]
+}
